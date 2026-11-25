@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#103f38">
+  <meta name="description" content="Utforsk sannsynlighet i norsk Lotto. Simuler ti faste rekker over én uke eller flere hundre år, og se hva kupongen koster og vinner.">
+  <title>Lottosimulator · Tallab</title>
+  <link rel="icon" href="./assets/merke.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+<svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h1m3 0h4m-8 4h1m3 0h4m-8 4h1m3 0h4"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19.5h16M6.5 16v-4m5.5 4V5m5.5 11V8"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M7.5 3.5v4m9-4v4m-13 3.5h17"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M7 4.8c0-.9.9-1.4 1.7-.9l11 7.2a1 1 0 0 1 0 1.8l-11 7.2c-.8.5-1.7 0-1.7-.9z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m13.5 6.5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12m0-12L6 18"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4zM15 8v1m0 2.5v1m0 2.5v1"/></symbol>
+  <symbol id="i-draw" viewBox="0 0 24 24"><circle cx="8" cy="14.5" r="5"/><path d="M7 8.5a4.8 4.8 0 1 1 8.8 2.8M14 13a4 4 0 1 1 .8 5.5"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+</svg>
+<header class="mast">
+  <div class="wrap topbar">
+    <a class="brand" href="./" aria-label="Tallab, til forsiden"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Tallab</a>
+    <nav aria-label="Hovedmeny"><a class="nav-current" href="#simulator">Simulator</a><button type="button" data-modal="prizes">Premietabell</button></nav>
+  </div>
+</header>
+<main class="wrap" id="simulator">
+  <section class="hero" aria-labelledby="title">
+    <div class="hero-text">
+      <div class="hero-kicker"><span class="kicker-line" aria-hidden="true"></span>Norsk Lotto · 2026</div>
+      <h1 id="title">Lottosimulator</h1>
+      <p>Hva skjer hvis du spiller de samme ti rekkene uke etter uke? Trekk tallene og se hva du sitter igjen med.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="art-orbit"></div><img src="./assets/lotto-kuler.png" width="900" height="534" alt=""></div>
+  </section>
+  <form id="setup" class="setup panel" novalidate>
+    <div class="setup-period">
+      <label for="weeks"><svg class="ico"><use href="#i-calendar"/></svg>Antall uker</label>
+      <div class="period-controls">
+        <input type="number" inputmode="numeric" id="weeks" min="1" max="52000" step="1" required value="52" aria-describedby="validation">
+        <div class="presets" id="presets" aria-label="Hurtigvalg">
+          <button type="button" data-weeks="1">1 uke</button><button type="button" data-weeks="52" aria-pressed="true">1 år</button><button type="button" data-weeks="520">10 år</button>
+        </div>
+      </div>
+    </div>
+    <div class="setup-action">
+      <div class="planned-cost"><span>Planlagt innsats</span><strong id="planned">2 600 kr</strong></div>
+      <button id="run" class="primary" type="submit"><svg class="ico"><use href="#i-play"/></svg>Start simulering</button>
+    </div>
+    <p id="validation" role="alert" class="form-error"></p>
+  </form>
+  <div class="workspace">
+    <section class="panel ticket-panel" aria-labelledby="ticket-heading">
+      <div class="card-head">
+        <div class="heading-group"><span class="icon-tile"><svg class="ico"><use href="#i-ticket"/></svg></span><h2 id="ticket-heading">Min kupong</h2></div>
+        <button class="quiet edit-btn" type="button" data-modal="edit"><svg class="ico"><use href="#i-edit"/></svg>Endre rekker</button>
+      </div>
+      <p class="subline">10 faste rekker <span>·</span> 5 kr per rekke</p>
+      <div class="ticket-table"><div class="ticket-labels"><span>Rekke</span><span>Tall</span><span>Rette</span></div><div id="ticket-rows"></div></div>
+    </section>
+    <div class="side">
+      <section class="panel results" aria-labelledby="result-heading">
+        <div class="card-head"><div class="heading-group"><span class="icon-tile"><svg class="ico"><use href="#i-chart"/></svg></span><h2 id="result-heading">Resultat</h2></div></div>
+        <p class="subline" id="result-caption">Ingen simulering ennå</p>
+        <div class="totals">
+          <div><span>Innsats</span><strong id="cost">0 kr</strong></div><div><span>Gevinst</span><strong id="prize">0 kr</strong></div>
+          <div class="net-total"><span>Nettoresultat</span><strong id="net">0 kr</strong></div>
+        </div>
+        <details id="wins-wrap" hidden><summary>Premier i perioden</summary><ul id="wins"></ul></details>
+      </section>
+      <section class="panel draw-panel" aria-labelledby="draw-heading">
+        <div class="card-head"><div class="heading-group"><span class="icon-tile"><svg class="ico"><use href="#i-draw"/></svg></span><h2 id="draw-heading">Ukens trekning</h2></div></div>
+        <p id="draw-label" class="subline">Ingen trekning ennå</p>
+        <div id="draw-balls" aria-label="Hovedtall og tilleggstall"></div>
+        <p class="draw-status" id="draw-status">Start simuleringen for å trekke tallene.</p>
+        <div id="browse" hidden>
+          <button type="button" id="prev" class="step" aria-label="Forrige uke"><svg class="ico flip"><use href="#i-chevron"/></svg></button>
+          <label for="select-week">Vis uke</label><input id="select-week" type="number" min="1" inputmode="numeric" aria-label="Vis uke">
+          <button type="button" id="next" class="step" aria-label="Neste uke"><svg class="ico"><use href="#i-chevron"/></svg></button>
+        </div>
+      </section>
+    </div>
+  </div>
+  <p class="sr-only" id="summary-status" aria-live="polite"></p>
+  <noscript>Slå på JavaScript i nettleseren for å bruke simulatoren.</noscript>
+</main>
+<footer class="wrap foot"><span>Tallab <b aria-hidden="true">/</b> Lottosimulator</span><button type="button" data-modal="prizes">Premiegrunnlag 2026</button></footer>
+<dialog id="prizes" aria-labelledby="prizes-title">
+  <div class="dialog-head"><div><p class="dialog-kicker">Norsk Lotto 2026</p><h2 id="prizes-title">Premietabell</h2></div><button class="close" type="button" data-close aria-label="Lukk premietabell"><svg class="ico"><use href="#i-close"/></svg></button></div>
+  <p>Halvparten av innsatsen går til premiepotten. Simulatoren bruker fordelingen under til å beregne en fast anslått premie for hvert treff.</p>
+  <div class="table-wrap"><table><thead><tr><th>Treff</th><th>Andel av potten</th><th>Anslått premie</th></tr></thead><tbody id="prize-table"></tbody></table></div>
+  <h3>Slik regner vi</h3><p>Vi ganger 2,50 kr per rekke med premieklassens andel og deler på sannsynligheten for treff. Vi runder ned til nærmeste femmer. Hver rekke får bare sin høyeste premie.</p>
+  <p>Ved en virkelig trekning deles potten mellom ukens vinnere. Beløpene varierer med omsetning, antall vinnere og overførte potter. Her simuleres de ordinære trekningene. Supertrekningen har sin egen pott.</p>
+  <a class="source-link" href="https://www.norsk-tipping.no/bli-kunde/no/kundevilkaar-og-spilleregler" target="_blank" rel="noreferrer">Norsk Tippings spilleregler, punkt 3.2</a>
+</dialog>
+<dialog id="edit" aria-labelledby="edit-title">
+  <div class="dialog-head"><div><p class="dialog-kicker">Min kupong</p><h2 id="edit-title">Endre en rekke</h2></div><button class="close" type="button" data-close aria-label="Lukk redigering"><svg class="ico"><use href="#i-close"/></svg></button></div>
+  <p>Velg sju forskjellige tall fra 1 til 34. Rekkene lagres i denne nettleseren og brukes i hver trekning.</p>
+  <div class="edit-tools"><label for="edit-row">Rekke <select id="edit-row"></select></label><button id="edit-random" type="button" class="quiet">Trekk sju tall</button></div>
+  <div id="edit-grid" aria-label="Velg sju tall"></div><div id="edit-count" aria-live="polite"></div>
+  <p id="edit-error" role="alert" class="form-error"></p>
+  <div class="dialog-actions"><button data-close class="quiet" type="button">Avbryt</button><button id="edit-save" class="primary" type="button">Lagre rekke</button></div>
+</dialog>
+</body>
+</html>
